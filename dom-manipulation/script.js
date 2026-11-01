@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", event => {
 
     quoteBtn.addEventListener("click", showNewQuote);
     createAddQuoteForm();
+    importExportField();
 
     quotes.forEach(quote => showNewQuote(quote));
     
@@ -53,6 +54,9 @@ document.addEventListener("DOMContentLoaded", event => {
     };
     
     function addQuote(){
+        /**
+         * Creates a new quote from inputed data.
+         */
         const text = document.getElementById('newQuoteText').value.trim();
         const category = document.getElementById('newQuoteCategory').value.trim();
     
@@ -65,92 +69,78 @@ document.addEventListener("DOMContentLoaded", event => {
     
         quotes.push(quote);
         showNewQuote(quote);
+        sessionStorage.setItem("quote", JSON.stringify(quote));
         localStorage.setItem('quotes', JSON.stringify(quotes));
+    };
+
+    function importExportField(){
+        const h1 = document.createElement("h1");
+        const jsonDiv = document.createElement("div");
+        const fileInput = document.createElement("input");
+        const br = document.createElement("br");
+        const br1 = document.createElement("br");
+        const exportBtn = document.createElement("button");
+    
+        h1.style.color = "lightgreen";
+        h1.textContent = "Import Export Section:"
+        fileInput.style.backgroundColor = "whitesmoke";
+        fileInput.textContent = "Import";
+        fileInput.type = "file";
+        fileInput.id = "importFile";
+        fileInput.accept = ".json";
+        fileInput.addEventListener("change", importFromJsonFile);
+    
+        exportBtn.textContent = "Export Json";
+        exportBtn.addEventListener("click", exportQuotes);
+    
+        jsonDiv.append(
+            h1,
+          fileInput,
+          br,
+          br1,
+          exportBtn
+        );
+    
+        document.body.appendChild(jsonDiv);
+    };
+    
+    function exportQuotes(){
+        /**
+         * exportQuotes: Generate a .json file `quotes.json` that contains all the quotes
+         *               in JSON format.
+         */
+      const blobQuotes = new Blob([JSON.stringify(quotes, null, 2)], {"type": "application/json"});
+      const url = URL.createObjectURL(blobQuotes);
+      const a = document.createElement("a");
+    
+      a.href = url;
+      a.download = "quotes.json";
+      a.click();
+    
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    }
+    
+    function importFromJsonFile(event) {
+        /**
+         * importFromJsonFile: Loads quotes from inputed .json file from user.
+         */
+      const fileReader = new FileReader();
+    
+      fileReader.onload = function(event) {
+        const importedQuotes = JSON.parse(event.target.result);
+        console.log(importedQuotes)
+        quotes.push(...importedQuotes);
+        saveQuotes();
+        alert("Quotes imported successfully!");
+      }
+    
+      fileReader.readAsText(event.target.files[0]);
+    }
+
+    function saveQuotes(){
+        localStorage.setItem("quotes", JSON.stringify(quotes) || "[]");
     };
 })
 
-
-const quotes = [
-  {
-    "category": "Motivation",
-    "text": "Every great achievement begins with the courage to take the first step."
-  },
-  {
-    "category": "Motivation",
-    "text": "Your future is built by the small decisions you make today."
-  },
-  {
-    "category": "Motivation",
-    "text": "Progress is not always fast, but every step forward counts."
-  },
-  {
-    "category": "Motivation",
-    "text": "Do not wait for confidence; build it through action."
-  },
-  {
-    "category": "Success",
-    "text": "Success is the result of consistent effort directed toward a meaningful goal."
-  },
-  {
-    "category": "Success",
-    "text": "Discipline carries you forward when motivation takes a day off."
-  },
-  {
-    "category": "Success",
-    "text": "The quality of your habits often determines the quality of your results."
-  },
-  {
-    "category": "Success",
-    "text": "Learn from every failure, improve your approach, and keep moving."
-  },
-  {
-    "category": "Wisdom",
-    "text": "Listening carefully can teach you what speaking quickly never will."
-  },
-  {
-    "category": "Wisdom",
-    "text": "Knowledge shows you what is possible; wisdom helps you choose what is right."
-  },
-  {
-    "category": "Wisdom",
-    "text": "A thoughtful question can open doors that confident assumptions keep closed."
-  },
-  {
-    "category": "Wisdom",
-    "text": "Knowing when to change your mind is a sign of strength, not weakness."
-  },
-  {
-    "category": "Perseverance",
-    "text": "Difficult roads can teach you strengths that easy paths never reveal."
-  },
-  {
-    "category": "Perseverance",
-    "text": "A setback is a moment in your journey, not the definition of your destination."
-  },
-  {
-    "category": "Perseverance",
-    "text": "Keep going, even when progress is too small to notice."
-  },
-  {
-    "category": "Perseverance",
-    "text": "Persistence turns repeated attempts into valuable experience."
-  },
-  {
-    "category": "Personal Growth",
-    "text": "Become more curious about who you could be than comfortable with who you are."
-  },
-  {
-    "category": "Personal Growth",
-    "text": "Every new skill begins with the willingness to be a beginner."
-  },
-  {
-    "category": "Personal Growth",
-    "text": "The person you become depends partly on what you are willing to learn."
-  },
-  {
-    "category": "Personal Growth",
-    "text": "Growth begins when you stop treating your limitations as permanent."
-  }
-]
-
-localStorage.setItem("quotes", JSON.stringify(quotes));
